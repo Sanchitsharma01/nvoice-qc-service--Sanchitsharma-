@@ -1,0 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta http-equiv="Content-Style-Type" content="text/css">
+  <title></title>
+  <meta name="Generator" content="Cocoa HTML Writer">
+  <meta name="CocoaVersion" content="2575.6">
+  <style type="text/css">
+    p.p1 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica}
+    p.p2 {margin: 0.0px 0.0px 0.0px 0.0px; font: 12.0px Helvetica; min-height: 14.0px}
+  </style>
+</head>
+<body>
+<p class="p1">&lt;!DOCTYPE html&gt;</p>
+<p class="p1">&lt;html lang="en"&gt;</p>
+<p class="p1">&lt;head&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;meta charset="UTF-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;title&gt;Invoice QC Console&lt;/title&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script src="https://unpkg.com/vue@3/dist/vue.global.js"&gt;&lt;/script&gt;</p>
+<p class="p1">&lt;/head&gt;</p>
+<p class="p1">&lt;body class="bg-gray-50 text-gray-800 font-sans p-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;div id="app" class="max-w-5xl mx-auto"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;header class="mb-10 text-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;h1 class="text-3xl font-bold text-indigo-700"&gt;Invoice QC Console&lt;/h1&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p class="text-gray-500"&gt;Automated Invoice Extraction &amp; Validation&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/header&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div class="bg-white p-8 rounded shadow-md text-center border-dashed border-2 border-gray-300 mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;input type="file" ref="fileInput" multiple @change="handleFileSelect" class="hidden" id="upload"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;label for="upload" class="cursor-pointer text-indigo-600 font-bold hover:text-indigo-800"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>Click to Upload PDF Invoices</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/label&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;p v-if="files.length" class="mt-2 text-sm text-gray-600"&gt;{{ files.length }} files selected&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;button @click="runAnalysis" :disabled="loading || !files.length" class="mt-4 bg-indigo-600 text-white px-6 py-2 rounded disabled:opacity-50"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>{{ loading ? 'Processing...' : 'Run Analysis' }}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/button&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div v-if="report" class="grid grid-cols-3 gap-4 mb-8"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-5 rounded shadow border-l-4 border-blue-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 text-sm"&gt;Processed&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-2xl font-bold"&gt;{{ report.summary.total_processed }}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-5 rounded shadow border-l-4 border-green-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 text-sm"&gt;Valid&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-2xl font-bold text-green-600"&gt;{{ report.summary.valid_invoices }}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div class="bg-white p-5 rounded shadow border-l-4 border-red-500"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-gray-500 text-sm"&gt;Invalid&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;p class="text-2xl font-bold text-red-600"&gt;{{ report.summary.invalid_invoices }}&lt;/p&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p2"><br></p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;div v-if="report" class="space-y-4"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;div v-for="item in report.details" :key="item.invoice_id" class="bg-white p-4 rounded shadow"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div class="flex justify-between items-center"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span :class="item.is_valid ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-1 rounded text-xs font-bold"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                            </span>{{ item.is_valid ? 'VALID' : 'INVALID' }}</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;span class="ml-3 font-semibold"&gt;{{ item.invoice_id }}&lt;/span&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;div v-if="!item.is_valid" class="mt-3 bg-red-50 p-2 rounded text-sm text-red-700"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;ul class="list-disc list-inside"&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>&lt;li v-for="err in item.errors"&gt;{{ err }}&lt;/li&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>&lt;/ul&gt;</p>
+<p class="p1"><span class="Apple-converted-space">                </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">            </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/div&gt;</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;script&gt;</p>
+<p class="p1"><span class="Apple-converted-space">        </span>const { createApp } = Vue</p>
+<p class="p1"><span class="Apple-converted-space">        </span>createApp({</p>
+<p class="p1"><span class="Apple-converted-space">            </span>data() { return { files: [], loading: false, report: null } },</p>
+<p class="p1"><span class="Apple-converted-space">            </span>methods: {</p>
+<p class="p1"><span class="Apple-converted-space">                </span>handleFileSelect(e) { this.files = Array.from(e.target.files); this.report = null; },</p>
+<p class="p1"><span class="Apple-converted-space">                </span>async runAnalysis() {</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.loading = true;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>const fd = new FormData();</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>this.files.forEach(f =&gt; fd.append('files', f));</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>try {</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const res = await fetch('http://127.0.0.1:8000/extract-and-validate-pdfs', { method: 'POST', body: fd });</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>const data = await res.json();</p>
+<p class="p1"><span class="Apple-converted-space">                        </span>this.report = data.validation_report;</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>} catch (e) { alert("API Error. Is backend running?"); }</p>
+<p class="p1"><span class="Apple-converted-space">                    </span>finally { this.loading = false; }</p>
+<p class="p1"><span class="Apple-converted-space">                </span>}</p>
+<p class="p1"><span class="Apple-converted-space">            </span>}</p>
+<p class="p1"><span class="Apple-converted-space">        </span>}).mount('#app')</p>
+<p class="p1"><span class="Apple-converted-space">    </span>&lt;/script&gt;</p>
+<p class="p1">&lt;/body&gt;</p>
+<p class="p1">&lt;/html&gt;</p>
+</body>
+</html>
